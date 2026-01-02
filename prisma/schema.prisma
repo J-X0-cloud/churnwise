@@ -1,0 +1,126 @@
+// Event store and derived revenue tables. MRR history is always rebuilt from billing_events;
+// customers, movements and failed payments are projections kept up to date by the webhook pipeline.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum BillingSource {
+  STRIPE
+  CHARGEBEE
+  RECURLY
+  BRAINTREE
+  PADDLE
+  APP_STORE
+  CUSTOM
+}
+
+enum MovementType {
+  NEW
+  EXPANSION
+  REACTIVATION
+  CONTRACTION
+  CHURN
+}
+
+enum FailedPaymentStatus {
+  OPEN
+  RECOVERED
+  LOST
+}
+
+model Workspace {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  currency  String   @default("USD")
+  createdAt DateTime @default(now())
+
+  customers      Customer[]
+  events         BillingEvent[]
+  movements      MrrMovement[]
+  failedPayments FailedPayment[]
+}
+
+/// Raw, append-only billing events as received from a connector. `externalId` makes ingestion idempotent.
+model BillingEvent {
+  id          String        @id @default(cuid())
+  workspaceId String
+  source      BillingSource
+  externalId  String
+  type        String
+  occurredAt  DateTime
+  payload     Json
+  receivedAt  DateTime      @default(now())
+  processedAt DateTime?
+
+  workspace Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  movements MrrMovement[]
+
+  @@unique([workspaceId, externalId])
+  @@index([workspaceId, occurredAt])
+}
+
+model Customer {
+  id          String    @id @default(cuid())
+  workspaceId String
+  externalId  String
+  name        String?
+  plan        String?
+  /// Current normalized monthly recurring revenue, in major currency units.
+  mrr         Float     @default(0)
+  firstPaidAt DateTime?
+  churnedAt   DateTime?
+  updatedAt   DateTime  @updatedAt
+
+  workspace      Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  movements      MrrMovement[]
+  failedPayments FailedPayment[]
+
+  @@unique([workspaceId, externalId])
+}
+
+model MrrMovement {
+  id          String       @id @default(cuid())
+  workspaceId String
+  customerId  String
+  eventId     String
+  type        MovementType
+  /// Always positive; the sign comes from the movement type.
+  amount      Float
+  mrrBefore   Float
+  mrrAfter    Float
+  occurredAt  DateTime
+
+  workspace Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  customer  Customer     @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  event     BillingEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId, occurredAt])
+  @@index([customerId, occurredAt])
+}
+
+model FailedPayment {
+  id                String              @id @default(cuid())
+  workspaceId       String
+  customerId        String
+  invoiceExternalId String
+  amount            Float
+  declineCode       String
+  attempts          Int                 @default(1)
+  status            FailedPaymentStatus @default(OPEN)
+  failedAt          DateTime
+  nextRetryAt       DateTime?
+  recoveredAt       DateTime?
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  customer  Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, invoiceExternalId])
+  @@index([workspaceId, status])
+}
