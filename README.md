@@ -62,11 +62,14 @@ Start the engine (it listens on http://localhost:8000; interactive API docs at `
 
 ```bash
 cd engine
-cp .env.example .env        # optional: without it the engine uses a local SQLite file
 uv sync
+export BILLING_WEBHOOK_SECRET=whsec_local  # only needed to send signed test webhooks
 uv run churnwise bootstrap  # apply migrations and create the sample workspace
 uv run churnwise serve --reload
 ```
+
+The engine reads its settings from environment variables (listed below and in `engine/.env.example`); it does not
+load a `.env` file. Without `DATABASE_URL` it stores events in a local SQLite file, `engine/churnwise.db`.
 
 Then, in another terminal, start the web app:
 
