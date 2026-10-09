@@ -19,3 +19,12 @@ build/
 npm-debug.log*
 pnpm-debug.log*
 .vercel
+
+# python (engine/)
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+dist/
+*.db
