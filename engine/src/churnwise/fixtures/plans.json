@@ -1,0 +1,36 @@
+{
+  "plans": [
+    {
+      "name": "Starter",
+      "price": "$99/mo",
+      "tone": "starter",
+      "mrrShare": [0.17, 0.12],
+      "customerShare": [0.46, 0.41],
+      "churn": 3.1
+    },
+    {
+      "name": "Growth",
+      "price": "$349/mo",
+      "tone": "mint",
+      "mrrShare": [0.38, 0.35],
+      "customerShare": [0.36, 0.37],
+      "churn": 1.6
+    },
+    {
+      "name": "Scale",
+      "price": "$1,190/mo",
+      "tone": "brand",
+      "mrrShare": [0.29, 0.33],
+      "customerShare": [0.14, 0.16],
+      "churn": 0.9
+    },
+    {
+      "name": "Enterprise",
+      "price": "Custom",
+      "tone": "brand_dark",
+      "mrrShare": [0.16, 0.2],
+      "customerShare": [0.04, 0.06],
+      "churn": 0.4
+    }
+  ]
+}

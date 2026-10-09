@@ -1,0 +1,19 @@
+{
+  "declineReasons": [
+    ["Insufficient funds", 34],
+    ["Expired card", 22],
+    ["Generic decline", 17],
+    ["Do not honor", 11],
+    ["Card reported lost", 6],
+    ["Authentication required", 6],
+    ["Processing error", 4]
+  ],
+  "openFailed": [
+    { "customer": "Sparrow Legal", "amount": 349, "declineCode": "insufficient_funds", "attempts": 2, "nextRetry": "Sep 27", "step": "Email 2 sent" },
+    { "customer": "Northgate Tutors", "amount": 698, "declineCode": "expired_card", "attempts": 1, "nextRetry": "Sep 25", "step": "Card update link sent" },
+    { "customer": "Pebble & Loom", "amount": 99, "declineCode": "do_not_honor", "attempts": 3, "nextRetry": "Sep 28", "step": "In-app banner live" },
+    { "customer": "Varsity Ops", "amount": 1190, "declineCode": "authentication_required", "attempts": 1, "nextRetry": "Sep 25", "step": "3DS link sent" },
+    { "customer": "Ridgeway Clinics", "amount": 2380, "declineCode": "insufficient_funds", "attempts": 1, "nextRetry": "Sep 26", "step": "Smart retry scheduled" },
+    { "customer": "Cobalt Kitchen Co.", "amount": 349, "declineCode": "generic_decline", "attempts": 4, "nextRetry": "Sep 30", "step": "Final notice queued" }
+  ]
+}

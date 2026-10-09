@@ -1,0 +1,47 @@
+{
+  "accounts": [
+    { "name": "Harbor & Pine Studio", "plan": "Scale", "mrr": 2380, "trend": "up", "status": "Expanded", "health": 92, "since": "Mar 2023", "owner": "Priya N." },
+    { "name": "Tallgrass Labs", "plan": "Enterprise", "mrr": 6400, "trend": "flat", "status": "Active", "health": 88, "since": "Jan 2022", "owner": "Marcus T." },
+    { "name": "Copperleaf Health", "plan": "Enterprise", "mrr": 5120, "trend": "up", "status": "Expanded", "health": 90, "since": "Jun 2023", "owner": "Priya N." },
+    { "name": "Oakline Freight", "plan": "Scale", "mrr": 1190, "trend": "down", "status": "At risk", "health": 41, "since": "Aug 2024", "owner": "Dana R." },
+    { "name": "Brightfold Media", "plan": "Growth", "mrr": 698, "trend": "up", "status": "Active", "health": 81, "since": "Feb 2025", "owner": "Dana R." },
+    { "name": "Sparrow Legal", "plan": "Growth", "mrr": 349, "trend": "flat", "status": "Past due", "health": 58, "since": "Nov 2024", "owner": "Marcus T." },
+    { "name": "Meridian Dental Group", "plan": "Scale", "mrr": 1785, "trend": "up", "status": "Active", "health": 84, "since": "Sep 2023", "owner": "Priya N." },
+    { "name": "Kitewell Robotics", "plan": "Growth", "mrr": 1047, "trend": "up", "status": "Expanded", "health": 87, "since": "Apr 2025", "owner": "Dana R." },
+    { "name": "Lumen & Oak Co.", "plan": "Starter", "mrr": 99, "trend": "down", "status": "Downgraded", "health": 52, "since": "Jul 2025", "owner": "Marcus T." },
+    { "name": "Bluefin Payroll", "plan": "Enterprise", "mrr": 8900, "trend": "flat", "status": "Active", "health": 95, "since": "Oct 2021", "owner": "Priya N." },
+    { "name": "Quarry Street Supply", "plan": "Growth", "mrr": 349, "trend": "down", "status": "Churn scheduled", "health": 22, "since": "Dec 2024", "owner": "Dana R." },
+    { "name": "Fernhill Analytics", "plan": "Scale", "mrr": 2380, "trend": "up", "status": "Active", "health": 79, "since": "May 2024", "owner": "Marcus T." }
+  ],
+  "activity": [
+    { "customer": "Harbor & Pine Studio", "detail": "Upgraded Growth → Scale", "kind": "upgrade", "amount": 841, "when": "2h ago" },
+    { "customer": "Ridgeway Clinics", "detail": "Payment recovered on retry 2", "kind": "recovered", "amount": 2380, "when": "4h ago" },
+    { "customer": "Quarry Street Supply", "detail": "Scheduled cancellation · Budget cuts", "kind": "cancellation", "amount": -349, "when": "6h ago" },
+    { "customer": "Kitewell Robotics", "detail": "Added 12 seats", "kind": "seats", "amount": 349, "when": "Yesterday" },
+    { "customer": "Lumen & Oak Co.", "detail": "Downgraded Growth → Starter", "kind": "downgrade", "amount": -250, "when": "Yesterday" },
+    { "customer": "Northgate Tutors", "detail": "New customer · Growth annual", "kind": "new", "amount": 698, "when": "Yesterday" }
+  ],
+  "profile": {
+    "name": "Harbor & Pine Studio",
+    "plan": "Scale plan · customer since Mar 2023",
+    "status": "Expanded",
+    "mrr": 2380,
+    "lifetimeRevenue": 48600,
+    "health": 92,
+    "timeline": [
+      { "date": "Sep 18", "title": "Upgraded to Scale", "detail": "Seats 18 → 30 · +$1,190 MRR", "tone": "brand" },
+      { "date": "Aug 02", "title": "Payment recovered", "detail": "Retry 2 succeeded after an expired card", "tone": "mint" },
+      { "date": "Jun 11", "title": "Added Insights add-on", "detail": "+$195 MRR", "tone": "brand" },
+      { "date": "Mar 04", "title": "Downgrade scheduled, then cancelled", "detail": "Saved by CS outreach", "tone": "amber" },
+      { "date": "Mar 14, 2023", "title": "Started paying", "detail": "Growth plan · annual", "tone": "ink" }
+    ]
+  },
+  "cancellationReasons": [
+    ["Budget cuts", 26],
+    ["Missing a feature", 19],
+    ["Low usage", 17],
+    ["Switched tools", 15],
+    ["Company closed", 12],
+    ["Other", 11]
+  ]
+}
