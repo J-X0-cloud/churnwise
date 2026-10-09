@@ -2,6 +2,7 @@ import clsx from "clsx";
 import type { CSSProperties } from "react";
 
 import { Sparkline } from "@/components/charts/Sparkline";
+import { toneColor } from "@/lib/palette";
 import type { Kpi } from "@/types/revenue";
 
 import { DeltaBadge } from "./DeltaBadge";
@@ -20,7 +21,7 @@ export function KpiTile({ kpi, spark = true }: { kpi: Kpi; spark?: boolean }) {
       <div className="kpi-f">
         <DeltaBadge delta={kpi.delta} />
         {spark && kpi.spark ? (
-          <Sparkline values={kpi.spark} width={80} height={24} color={kpi.sparkColor} />
+          <Sparkline values={kpi.spark} width={80} height={24} color={toneColor(kpi.sparkTone)} />
         ) : null}
       </div>
     </div>

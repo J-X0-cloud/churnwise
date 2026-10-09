@@ -2,8 +2,9 @@
  * Chart geometry for the hand-rolled SVG charts. Charts draw in a fixed viewBox and scale with CSS,
  * so all coordinates here are in viewBox units.
  */
-import { lerp } from "@/lib/random";
 import type { MovementTotals } from "@/types/revenue";
+
+const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 
 export interface Frame {
   width: number;

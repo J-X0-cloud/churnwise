@@ -1,14 +1,10 @@
 "use client";
 
-import { useMemo } from "react";
-
 import { MovementChart } from "@/components/charts/MovementChart";
 import { Waterfall } from "@/components/charts/Waterfall";
 import { money } from "@/lib/format";
 import { MOVEMENTS } from "@/lib/palette";
-import { movementBuckets, rangeStats, sumTotals } from "@/lib/revenue";
-import { DAILY } from "@/lib/data/simulation";
-import type { MovementBucket, RangeKey } from "@/types/revenue";
+import type { MovementBucket, RangeView } from "@/types/revenue";
 
 import { DataTable } from "../DataTable";
 import type { Column } from "../DataTable";
@@ -17,28 +13,23 @@ import { Panel } from "../Panel";
 
 const COLUMNS: Column<MovementBucket>[] = [
   { key: "period", header: "Period", render: (b) => b.label },
-  ...MOVEMENTS.map(
-    (m): Column<MovementBucket> => ({
-      key: m.key,
-      header: (
-        <>
-          <i className="dot" style={{ background: m.color }} />
-          {m.label}
-        </>
-      ),
-      numeric: true,
-      render: (b) => money(b[m.key]),
-    }),
-  ),
+  ...MOVEMENTS.map((m): Column<MovementBucket> => ({
+    key: m.key,
+    header: (
+      <>
+        <i className="dot" style={{ background: m.color }} />
+        {m.label}
+      </>
+    ),
+    numeric: true,
+    render: (b) => money(b[m.key]),
+  })),
   { key: "net", header: "Net new", numeric: true, render: (b) => <b>{money(b.net)}</b> },
-  { key: "ending", header: "Ending MRR", numeric: true, render: (b) => money(DAILY[b.end - 1].mrr) },
+  { key: "ending", header: "Ending MRR", numeric: true, render: (b) => money(b.endingMrr) },
 ];
 
-export function RevenuePanel({ range }: { range: RangeKey }) {
-  const { stats, buckets, totals } = useMemo(() => {
-    const b = movementBuckets(range);
-    return { stats: rangeStats(range), buckets: b, totals: sumTotals(b) };
-  }, [range]);
+export function RevenuePanel({ view }: { view: RangeView }) {
+  const { stats, buckets, totals } = view;
 
   return (
     <>

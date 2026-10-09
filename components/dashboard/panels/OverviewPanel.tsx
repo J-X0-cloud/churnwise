@@ -1,14 +1,10 @@
 "use client";
 
-import { useMemo } from "react";
-
 import { AreaChart } from "@/components/charts/AreaChart";
 import { MovementChart } from "@/components/charts/MovementChart";
 import { Waterfall } from "@/components/charts/Waterfall";
 import { money, pct } from "@/lib/format";
-import { MRR_LABEL_EVERY, mrrLine, overviewKpis, planBreakdown, topAccounts } from "@/lib/metrics";
-import { RANGES, gained, lost, movementBuckets, quickRatio, rangeStats, sumTotals } from "@/lib/revenue";
-import type { RangeKey, TabKey } from "@/types/revenue";
+import type { DashboardSnapshot, RangeKey, TabKey } from "@/types/revenue";
 
 import { ActivityFeed } from "../ActivityFeed";
 import { CustomersTable } from "../CustomersTable";
@@ -17,13 +13,16 @@ import { MovementLegend } from "../MovementLegend";
 import { Panel } from "../Panel";
 import { PlanMix } from "../PlanMix";
 
-export function OverviewPanel({ range, onNavigate }: { range: RangeKey; onNavigate: (tab: TabKey) => void }) {
-  const { stats, buckets, totals, kpis } = useMemo(() => {
-    const b = movementBuckets(range);
-    return { stats: rangeStats(range), buckets: b, totals: sumTotals(b), kpis: overviewKpis(range) };
-  }, [range]);
-  const plans = useMemo(() => planBreakdown(), []);
-  const cadence = RANGES[range].bucket;
+interface OverviewPanelProps {
+  data: DashboardSnapshot;
+  range: RangeKey;
+  onNavigate: (tab: TabKey) => void;
+}
+
+export function OverviewPanel({ data, range, onNavigate }: OverviewPanelProps) {
+  const view = data.views[range];
+  const { stats, buckets, totals, kpis } = view;
+  const cadence = data.ranges.find((r) => r.key === range)!.bucket;
 
   return (
     <>
@@ -36,10 +35,10 @@ export function OverviewPanel({ range, onNavigate }: { range: RangeKey; onNaviga
         >
           <div className="cs-wide">
             <AreaChart
-              points={mrrLine(stats)}
+              points={view.line}
               width={820}
               height={330}
-              labelEvery={MRR_LABEL_EVERY[range]}
+              labelEvery={view.labelEvery}
               zero
               label="Monthly recurring revenue"
             />
@@ -57,15 +56,15 @@ export function OverviewPanel({ range, onNavigate }: { range: RangeKey; onNaviga
           <div className="stat-row">
             <div>
               <small>Quick ratio</small>
-              <b>{quickRatio(totals).toFixed(1)}×</b>
+              <b>{view.quickRatio.toFixed(1)}×</b>
             </div>
             <div>
               <small>Gained</small>
-              <b>{money(gained(totals))}</b>
+              <b>{money(view.gained)}</b>
             </div>
             <div>
               <small>Lost</small>
-              <b>{money(lost(totals))}</b>
+              <b>{money(view.lost)}</b>
             </div>
           </div>
         </Panel>
@@ -77,8 +76,8 @@ export function OverviewPanel({ range, onNavigate }: { range: RangeKey; onNaviga
           </div>
           <MovementLegend />
         </Panel>
-        <Panel title="MRR by plan" meta="as of Sep 24, 2026">
-          <PlanMix plans={plans} />
+        <Panel title="MRR by plan" meta={`as of ${data.workspace.asOfLabel}`}>
+          <PlanMix plans={data.plans} />
         </Panel>
       </div>
       <div className="dg dg-21">
@@ -99,11 +98,11 @@ export function OverviewPanel({ range, onNavigate }: { range: RangeKey; onNaviga
           }
         >
           <div className="scroll-x">
-            <CustomersTable customers={topAccounts(6)} compact />
+            <CustomersTable customers={data.accounts.slice(0, 6)} compact />
           </div>
         </Panel>
         <Panel title="Recent activity" meta="live">
-          <ActivityFeed />
+          <ActivityFeed items={data.activity} />
         </Panel>
       </div>
     </>

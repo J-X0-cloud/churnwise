@@ -3,8 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 
 import { Brand } from "@/components/site/Logo";
-import { WORKSPACE } from "@/lib/data/simulation";
-import type { CohortMetric, RangeKey, Scenario, TabKey } from "@/types/revenue";
+import type { CohortMetric, DashboardSnapshot, RangeKey, Scenario, TabKey } from "@/types/revenue";
 
 import { AppNav, MobileTabs } from "./AppNav";
 import { CustomersPanel } from "./panels/CustomersPanel";
@@ -18,9 +17,10 @@ import { TABS, isTabKey } from "./tabs";
 
 /**
  * The demo dashboard. The active tab lives in the URL hash (so /demo#recovery deep-links), while the
- * date range, cohort metric and forecast scenario are view state shared across tabs.
+ * date range, cohort metric and forecast scenario are view state shared across tabs. All numbers come from
+ * one engine snapshot, so switching tabs or ranges never waits on the network.
  */
-export function DashboardShell() {
+export function DashboardShell({ data }: { data: DashboardSnapshot }) {
   const [tab, setTab] = useState<TabKey>("overview");
   const [range, setRange] = useState<RangeKey>("12m");
   const [cohortMetric, setCohortMetric] = useState<CohortMetric>("net");
@@ -43,6 +43,7 @@ export function DashboardShell() {
   }, []);
 
   const title = TABS.find((t) => t.key === tab)!.title;
+  const { workspace } = data;
 
   return (
     <>
@@ -51,13 +52,13 @@ export function DashboardShell() {
         <aside className="app-side">
           <Brand />
           <div className="ws">
-            <b>{WORKSPACE.name}</b>
-            <small>Sample workspace · {WORKSPACE.currency}</small>
+            <b>{workspace.name}</b>
+            <small>Sample workspace · {workspace.currency}</small>
           </div>
           <AppNav active={tab} onSelect={navigate} />
           <div className="side-foot">
             <b>Data synced 6 min ago</b>
-            {WORKSPACE.sources}
+            {workspace.sources}
           </div>
         </aside>
         <main className="dmain" id="main">
@@ -65,11 +66,11 @@ export function DashboardShell() {
             <h1>
               <span>{title}</span>
               <span className="sub">
-                {WORKSPACE.name} · all plans · {WORKSPACE.currency}
+                {workspace.name} · all plans · {workspace.currency}
               </span>
             </h1>
             <div className="tools">
-              <RangePicker value={range} onChange={setRange} />
+              <RangePicker ranges={data.ranges} value={range} onChange={setRange} />
               <span className="chip">
                 Compare: <b>previous period</b>
               </span>
@@ -82,14 +83,22 @@ export function DashboardShell() {
             </div>
           </div>
           <section className="tabpane" id={tab} aria-label={title}>
-            {tab === "overview" ? <OverviewPanel range={range} onNavigate={navigate} /> : null}
-            {tab === "revenue" ? <RevenuePanel range={range} /> : null}
+            {tab === "overview" ? <OverviewPanel data={data} range={range} onNavigate={navigate} /> : null}
+            {tab === "revenue" ? <RevenuePanel view={data.views[range]} /> : null}
             {tab === "retention" ? (
-              <RetentionPanel cohortMetric={cohortMetric} onCohortMetricChange={setCohortMetric} />
+              <RetentionPanel
+                retention={data.retention}
+                cohortMetric={cohortMetric}
+                onCohortMetricChange={setCohortMetric}
+              />
             ) : null}
-            {tab === "customers" ? <CustomersPanel /> : null}
-            {tab === "forecast" ? <ForecastPanel scenario={scenario} onScenarioChange={setScenario} /> : null}
-            {tab === "recovery" ? <RecoveryPanel /> : null}
+            {tab === "customers" ? (
+              <CustomersPanel customers={data.customers} accounts={data.accounts} />
+            ) : null}
+            {tab === "forecast" ? (
+              <ForecastPanel forecast={data.forecast} scenario={scenario} onScenarioChange={setScenario} />
+            ) : null}
+            {tab === "recovery" ? <RecoveryPanel recovery={data.recovery} /> : null}
           </section>
         </main>
       </div>

@@ -1,10 +1,7 @@
 "use client";
 
-import { useMemo } from "react";
-
 import { num } from "@/lib/format";
-import { customerKpis, topAccounts } from "@/lib/metrics";
-import { DAILY, LAST } from "@/lib/data/simulation";
+import type { CustomerAccount, CustomersView } from "@/types/revenue";
 
 import { CustomersTable } from "../CustomersTable";
 import { KpiGrid } from "../KpiTile";
@@ -17,10 +14,15 @@ const FILTERS = [
   ["Sort", "MRR, high to low"],
 ] as const;
 
-export function CustomersPanel() {
-  const kpis = useMemo(() => customerKpis(), []);
-  const accounts = topAccounts();
-  const total = num(DAILY[LAST].customers);
+export function CustomersPanel({
+  customers,
+  accounts,
+}: {
+  customers: CustomersView;
+  accounts: CustomerAccount[];
+}) {
+  const { kpis } = customers;
+  const total = num(customers.total);
 
   return (
     <>

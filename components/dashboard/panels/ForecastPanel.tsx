@@ -1,24 +1,11 @@
 "use client";
 
-import { useMemo } from "react";
-
 import { ForecastChart } from "@/components/charts/ForecastChart";
 import { HBarList } from "@/components/charts/HBarList";
 import { Legend } from "@/components/charts/Legend";
-import {
-  SCENARIOS,
-  SCENARIO_ASSUMPTIONS,
-  forecast,
-  forecastEnd,
-  forecastTable,
-  monthsToTarget,
-  scenarioMeta,
-} from "@/lib/forecast";
-import type { ForecastRow } from "@/lib/forecast";
 import { money, pct } from "@/lib/format";
-import { INK } from "@/lib/palette";
-import { DAILY, LAST } from "@/lib/data/simulation";
-import type { Scenario } from "@/types/revenue";
+import { INK, SCENARIO_COLORS } from "@/lib/palette";
+import type { ForecastRow, ForecastView, Scenario } from "@/types/revenue";
 
 import { DataTable } from "../DataTable";
 import type { Column } from "../DataTable";
@@ -34,57 +21,53 @@ const COLUMNS: Column<ForecastRow>[] = [
   { key: "arr", header: "Run-rate ARR", numeric: true, render: (r) => money(r.runRateArr) },
 ];
 
-const MILLION = 1_000_000;
-
-export function ForecastPanel({
-  scenario,
-  onScenarioChange,
-}: {
+interface ForecastPanelProps {
+  forecast: ForecastView;
   scenario: Scenario;
   onScenarioChange: (s: Scenario) => void;
-}) {
-  const all = useMemo(
-    () =>
-      Object.fromEntries(SCENARIOS.map((s) => [s.key, forecast(s.key)])) as Record<
-        Scenario,
-        ReturnType<typeof forecast>
-      >,
-    [],
-  );
-  const current = all[scenario];
-  const meta = scenarioMeta(scenario);
-  const end = forecastEnd(current);
+}
+
+export function ForecastPanel({ forecast, scenario, onScenarioChange }: ForecastPanelProps) {
+  const { scenarios } = forecast;
+  const meta = scenarios.find((s) => s.key === scenario)!;
+  const current = meta.forecast;
+  const color = SCENARIO_COLORS[scenario];
+  const end = meta.end;
   const [low, high] = current.band[current.band.length - 1];
-  const assumptions = SCENARIO_ASSUMPTIONS[scenario];
+  const assumptions = meta.assumptions;
   const scenarioName = meta.label.toLowerCase();
+  const endOf = (key: Scenario) => scenarios.find((s) => s.key === key)!.end;
 
   return (
     <>
       <div className="filters">
         <Segmented
-          options={SCENARIOS.map((s) => ({ key: s.key, label: s.label }))}
+          options={scenarios.map((s) => ({ key: s.key, label: s.label }))}
           value={scenario}
           onChange={onScenarioChange}
           label="Scenario"
         />
         <span className="chip">
-          Horizon: <b>12 months</b>
+          Horizon: <b>{forecast.horizonMonths} months</b>
         </span>
       </div>
       <div className="dg dg-21">
-        <Panel title={`MRR forecast · ${scenarioName} scenario`} meta="next 12 months · 80% interval">
+        <Panel
+          title={`MRR forecast · ${scenarioName} scenario`}
+          meta={`next ${forecast.horizonMonths} months · 80% interval`}
+        >
           <div className="cs-wide">
             <ForecastChart forecast={current} width={900} height={320} />
           </div>
           <Legend
             items={[
               { label: "Actual", color: INK, kind: "line" },
-              { label: `Forecast (${scenarioName})`, color: meta.color, kind: "line" },
-              { label: "80% interval", color: meta.color, kind: "band" },
+              { label: `Forecast (${scenarioName})`, color, kind: "line" },
+              { label: "80% interval", color, kind: "band" },
             ]}
           />
         </Panel>
-        <Panel title="September 2027">
+        <Panel title={forecast.horizonLabel}>
           <div className="bignum">{money(end)}</div>
           <p className="muted" style={{ fontSize: 12.5, margin: "4px 0 0" }}>
             Projected MRR · range {money(low)} – {money(high)}
@@ -96,7 +79,7 @@ export function ForecastPanel({
             </div>
             <div>
               <small>Growth vs today</small>
-              <b>{pct((end / DAILY[LAST].mrr - 1) * 100, 0, true)}</b>
+              <b>{pct((end / forecast.currentMrr - 1) * 100, 0, true)}</b>
             </div>
           </div>
           <table className="tbl mini" style={{ marginTop: 14 }}>
@@ -138,13 +121,13 @@ export function ForecastPanel({
           }
         >
           <div className="scroll-x">
-            <DataTable columns={COLUMNS} rows={forecastTable(current)} rowKey={(r) => r.month} />
+            <DataTable columns={COLUMNS} rows={meta.table} rowKey={(r) => r.month} />
           </div>
         </Panel>
-        <Panel title="Scenarios compared" meta="MRR in Sep 2027">
+        <Panel title="Scenarios compared" meta={`MRR in ${forecast.horizonShortLabel}`}>
           <HBarList
-            items={SCENARIOS.map((s) => [s.label, forecastEnd(all[s.key])])}
-            color={meta.color}
+            items={scenarios.map((s) => [s.label, s.end])}
+            color={color}
             format={(v) => money(v, 2)}
           />
           <p className="note">
@@ -154,11 +137,11 @@ export function ForecastPanel({
           <div className="stat-row" style={{ gridTemplateColumns: "1fr 1fr" }}>
             <div>
               <small>Spread, stretch vs conservative</small>
-              <b>{money(forecastEnd(all.stretch) - forecastEnd(all.conservative))}</b>
+              <b>{money(endOf("stretch") - endOf("conservative"))}</b>
             </div>
             <div>
-              <small>Months to $1M MRR</small>
-              <b>{monthsToTarget(current, MILLION) ?? "12+"}</b>
+              <small>Months to {money(forecast.target, 0)} MRR</small>
+              <b>{meta.monthsToTarget ?? `${forecast.horizonMonths}+`}</b>
             </div>
           </div>
         </Panel>

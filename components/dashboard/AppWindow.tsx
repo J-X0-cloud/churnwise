@@ -1,17 +1,15 @@
 import { AreaChart } from "@/components/charts/AreaChart";
 import { Waterfall } from "@/components/charts/Waterfall";
-import { mrrLine, overviewKpis } from "@/lib/metrics";
-import { RANGES, RANGE_KEYS, movementBuckets, rangeStats, sumTotals } from "@/lib/revenue";
-import { WORKSPACE } from "@/lib/data/simulation";
+import type { DashboardSnapshot } from "@/types/revenue";
 
 import { AppNav } from "./AppNav";
 import { KpiGrid } from "./KpiTile";
 
 /** Browser-framed screenshot of the Overview tab for the home page hero, rendered from live components. */
-export function AppWindow() {
+export function AppWindow({ data }: { data: DashboardSnapshot }) {
   const range = "12m";
-  const stats = rangeStats(range);
-  const totals = sumTotals(movementBuckets(range));
+  const view = data.views[range];
+  const { stats, totals } = view;
 
   return (
     <div className="win">
@@ -25,7 +23,7 @@ export function AppWindow() {
         <div className="app mini">
           <aside className="app-side">
             <div className="ws">
-              <b>{WORKSPACE.name}</b>
+              <b>{data.workspace.name}</b>
               <small>Sample workspace</small>
             </div>
             <AppNav active="overview" />
@@ -34,14 +32,14 @@ export function AppWindow() {
             <div className="app-top">
               <h3>Overview</h3>
               <div className="seg">
-                {RANGE_KEYS.map((k) => (
-                  <span key={k} className={k === range ? "on" : undefined}>
-                    {RANGES[k].short}
+                {data.ranges.map((r) => (
+                  <span key={r.key} className={r.key === range ? "on" : undefined}>
+                    {r.short}
                   </span>
                 ))}
               </div>
             </div>
-            <KpiGrid kpis={overviewKpis(range).slice(0, 4)} columns={4} />
+            <KpiGrid kpis={view.kpis.slice(0, 4)} columns={4} />
             <div className="grid-a">
               <div className="panel">
                 <div className="ph">
@@ -50,7 +48,7 @@ export function AppWindow() {
                 </div>
                 <div className="cs">
                   <AreaChart
-                    points={mrrLine(stats)}
+                    points={view.line}
                     width={640}
                     height={230}
                     labelEvery={1}

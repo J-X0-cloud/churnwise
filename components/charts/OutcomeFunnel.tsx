@@ -1,4 +1,5 @@
 import { money } from "@/lib/format";
+import { TONES } from "@/lib/palette";
 import type { FunnelItem } from "@/types/revenue";
 
 /** Failed-payment outcomes as bars relative to the total failed amount. */
@@ -13,7 +14,9 @@ export function OutcomeFunnel({ items }: { items: FunnelItem[] }) {
             <b>{money(item.value)}</b>
           </div>
           <span className="fn-t">
-            <i style={{ width: `${((item.value / total) * 100).toFixed(1)}%`, background: item.color }} />
+            <i
+              style={{ width: `${((item.value / total) * 100).toFixed(1)}%`, background: TONES[item.tone] }}
+            />
           </span>
         </div>
       ))}

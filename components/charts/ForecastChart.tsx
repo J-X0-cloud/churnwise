@@ -1,9 +1,8 @@
 "use client";
 
 import { frame, linePath, niceTicks, plotHeight, plotWidth, xAt, yScale } from "@/lib/charts";
-import { forecastEnd, scenarioMeta } from "@/lib/forecast";
 import { money, moneyAxis } from "@/lib/format";
-import { INK } from "@/lib/palette";
+import { INK, SCENARIO_COLORS } from "@/lib/palette";
 import type { Forecast } from "@/types/revenue";
 
 import { useTip } from "./TooltipProvider";
@@ -22,7 +21,7 @@ export function ForecastChart({
   height?: number;
 }) {
   const tip = useTip();
-  const { color } = scenarioMeta(forecast.scenario);
+  const color = SCENARIO_COLORS[forecast.scenario];
   const f = frame(width, height);
   const { history, projection } = forecast;
   const points = [...history, ...projection];
@@ -41,7 +40,7 @@ export function ForecastChart({
   const projected = [...history.slice(0, -1).map(() => null), lastActual, ...projection.map((p) => p.value)];
   const bandTop = band.map(([, hi], i) => `${x(bandOffset + i).toFixed(1)},${y(hi).toFixed(1)}`);
   const bandBottom = band.map(([lo], i) => `${x(bandOffset + i).toFixed(1)},${y(lo).toFixed(1)}`).reverse();
-  const end = forecastEnd(forecast);
+  const end = projection[projection.length - 1].value;
   const cellWidth = plotWidth(f) / (n - 1);
 
   return (

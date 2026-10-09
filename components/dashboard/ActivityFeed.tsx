@@ -1,12 +1,13 @@
-import { RECENT_ACTIVITY } from "@/lib/data/customers";
+import { ACTIVITY_STYLE } from "@/lib/palette";
+import type { ActivityItem } from "@/types/revenue";
 
-export function ActivityFeed() {
+export function ActivityFeed({ items }: { items: ActivityItem[] }) {
   return (
     <ul className="feed">
-      {RECENT_ACTIVITY.map((item) => (
+      {items.map((item) => (
         <li key={item.customer + item.detail}>
-          <span className="fi" style={{ background: item.color }}>
-            {item.glyph}
+          <span className="fi" style={{ background: ACTIVITY_STYLE[item.kind].color }}>
+            {ACTIVITY_STYLE[item.kind].glyph}
           </span>
           <div>
             <b>{item.customer}</b>
@@ -14,7 +15,7 @@ export function ActivityFeed() {
               {item.detail} · {item.when}
             </small>
           </div>
-          <span className={`amt ${item.direction}`}>{item.amount}</span>
+          <span className={`amt ${item.amount >= 0 ? "p" : "m"}`}>{item.amountLabel}</span>
         </li>
       ))}
     </ul>

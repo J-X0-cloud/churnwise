@@ -1,24 +1,17 @@
 "use client";
 
-import { useMemo } from "react";
-
 import { BarChart } from "@/components/charts/BarChart";
 import { HBarList } from "@/components/charts/HBarList";
 import { OutcomeFunnel } from "@/components/charts/OutcomeFunnel";
-import { DECLINE_REASONS, OPEN_FAILED } from "@/lib/data/recovery";
-import { recoveryKpis } from "@/lib/metrics";
 import { BRAND, MINT } from "@/lib/palette";
-import { recoveryByMonth, recoveryFunnel } from "@/lib/recovery";
+import type { RecoveryView } from "@/types/revenue";
 
 import { KpiGrid } from "../KpiTile";
 import { OpenFailedTable } from "../OpenFailedTable";
 import { Panel } from "../Panel";
 
-export function RecoveryPanel() {
-  const { kpis, funnel, months } = useMemo(
-    () => ({ kpis: recoveryKpis(), funnel: recoveryFunnel(), months: recoveryByMonth(12) }),
-    [],
-  );
+export function RecoveryPanel({ recovery }: { recovery: RecoveryView }) {
+  const { kpis, funnel, months, openFailed } = recovery;
 
   return (
     <>
@@ -41,11 +34,11 @@ export function RecoveryPanel() {
       </div>
       <div className="dg dg-12">
         <Panel title="Decline reasons">
-          <HBarList items={DECLINE_REASONS} color={BRAND} />
+          <HBarList items={recovery.declineReasons} color={BRAND} />
         </Panel>
-        <Panel title="In recovery now" meta={`${OPEN_FAILED.length} invoices`}>
+        <Panel title="In recovery now" meta={`${openFailed.length} invoices`}>
           <div className="scroll-x">
-            <OpenFailedTable />
+            <OpenFailedTable payments={openFailed} maxAttempts={recovery.maxAttempts} />
           </div>
         </Panel>
       </div>

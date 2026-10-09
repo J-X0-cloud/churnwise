@@ -17,21 +17,20 @@ import { Roles } from "@/components/marketing/Roles";
 import { SectionHead } from "@/components/marketing/SectionHead";
 import { ButtonLink } from "@/components/ui/ButtonLink";
 import { CheckList } from "@/components/ui/CheckList";
-import { COHORTS } from "@/lib/data/cohorts";
 import { FEATURE_CHECKS, HERO_CONNECTORS } from "@/lib/data/home";
 import { TRIAL_URL } from "@/lib/data/site";
-import { forecast, forecastEnd } from "@/lib/forecast";
+import { getDashboard, scenarioByKey } from "@/lib/api";
 import { money } from "@/lib/format";
 import { BRAND, INK } from "@/lib/palette";
-import { recoveryFunnel } from "@/lib/recovery";
-import { movementBuckets, rangeStats, sumTotals } from "@/lib/revenue";
 
-export default function HomePage() {
-  const buckets = movementBuckets("12m");
-  const totals = sumTotals(buckets);
-  const stats = rangeStats("12m");
-  const base = forecast("base");
-  const funnel = recoveryFunnel();
+export const dynamic = "force-dynamic";
+
+export default async function HomePage() {
+  const data = await getDashboard();
+  const { stats, buckets, totals } = data.views["12m"];
+  const base = scenarioByKey(data, "base");
+  const funnel = data.recovery.funnel;
+  const cohorts = data.retention;
 
   return (
     <>
@@ -68,7 +67,7 @@ export default function HomePage() {
             </div>
           </div>
           <div className="hero-shot">
-            <AppWindow />
+            <AppWindow data={data} />
           </div>
         </div>
       </section>
@@ -122,7 +121,14 @@ export default function HomePage() {
             visual={
               <Panel variant="card" title="Net MRR retention by signup month" meta="% of starting MRR">
                 <div className="scroll-x">
-                  <CohortGrid cohorts={COHORTS} metric="net" months={9} rows={9} compact />
+                  <CohortGrid
+                    cohorts={cohorts.cohorts}
+                    average={cohorts.averages.net}
+                    metric="net"
+                    months={9}
+                    rows={9}
+                    compact
+                  />
                 </div>
               </Panel>
             }
@@ -140,10 +146,14 @@ export default function HomePage() {
                 variant="card"
                 title="MRR forecast"
                 meta="Base scenario, next 12 months"
-                aside={<span className="r pill g">{money(forecastEnd(base))} by Sep 2027</span>}
+                aside={
+                  <span className="r pill g">
+                    {money(base.end)} by {data.forecast.horizonShortLabel}
+                  </span>
+                }
               >
                 <div className="cs-wide">
-                  <ForecastChart forecast={base} width={640} height={270} />
+                  <ForecastChart forecast={base.forecast} width={640} height={270} />
                 </div>
                 <Legend
                   items={[

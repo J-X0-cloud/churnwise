@@ -1,12 +1,11 @@
 import { Sparkline } from "@/components/charts/Sparkline";
-import { STATUS_TONE } from "@/lib/data/customers";
 import { money } from "@/lib/format";
-import { accountTrend } from "@/lib/metrics";
 import { AMBER, BRAND, MUTED, RED } from "@/lib/palette";
 import type { CustomerAccount } from "@/types/revenue";
 
 import { DataTable } from "./DataTable";
 import type { Column } from "./DataTable";
+import { STATUS_TONE } from "./status";
 import { StatusBadge } from "./StatusBadge";
 
 const TREND_COLOR = { up: BRAND, flat: MUTED, down: RED } as const;
@@ -22,9 +21,7 @@ const initials = (name: string) =>
 
 const healthColor = (h: number) => (h >= 75 ? BRAND : h >= 45 ? AMBER : RED);
 
-type Row = CustomerAccount & { index: number };
-
-const BASE_COLUMNS: Column<Row>[] = [
+const BASE_COLUMNS: Column<CustomerAccount>[] = [
   {
     key: "customer",
     header: "Customer",
@@ -40,9 +37,7 @@ const BASE_COLUMNS: Column<Row>[] = [
   {
     key: "trend",
     header: "12-month MRR",
-    render: (c) => (
-      <Sparkline values={accountTrend(c, c.index)} width={92} height={26} color={TREND_COLOR[c.trend]} />
-    ),
+    render: (c) => <Sparkline values={c.history} width={92} height={26} color={TREND_COLOR[c.trend]} />,
   },
   {
     key: "status",
@@ -64,7 +59,7 @@ const BASE_COLUMNS: Column<Row>[] = [
   },
 ];
 
-const DETAIL_COLUMNS: Column<Row>[] = [
+const DETAIL_COLUMNS: Column<CustomerAccount>[] = [
   { key: "since", header: "Customer since", render: (c) => c.since },
   { key: "owner", header: "Owner", render: (c) => c.owner },
 ];
@@ -80,7 +75,7 @@ export function CustomersTable({
     <DataTable
       className="cust"
       columns={compact ? BASE_COLUMNS : [...BASE_COLUMNS, ...DETAIL_COLUMNS]}
-      rows={customers.map((c, index) => ({ ...c, index }))}
+      rows={customers}
       rowKey={(c) => c.name}
     />
   );

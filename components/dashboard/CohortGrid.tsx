@@ -5,11 +5,12 @@ import clsx from "clsx";
 import { useTip } from "@/components/charts/TooltipProvider";
 import { HEAT_DOMAIN, heatColor } from "@/lib/charts";
 import { money } from "@/lib/format";
-import { cohortAverage } from "@/lib/revenue";
 import type { Cohort, CohortMetric } from "@/types/revenue";
 
 interface CohortGridProps {
   cohorts: readonly Cohort[];
+  /** Cohort-average row, one value per month since signup (from the engine). */
+  average: Array<number | null>;
   metric?: CohortMetric;
   months?: number;
   rows?: number;
@@ -20,6 +21,7 @@ interface CohortGridProps {
 /** Retention heat map by signup month, with a cohort-average row. */
 export function CohortGrid({
   cohorts,
+  average,
   metric = "net",
   months = 12,
   rows = 12,
@@ -27,7 +29,6 @@ export function CohortGrid({
 }: CohortGridProps) {
   const tip = useTip();
   const shown = cohorts.slice(0, rows);
-  const average = cohortAverage(cohorts, metric, months);
   const periods = Array.from({ length: months }, (_, k) => k);
 
   return (
@@ -82,11 +83,13 @@ export function CohortGrid({
               <td />
             </>
           )}
-          {average.map((v, k) => (
-            <td key={k} className={v === null ? undefined : "n"}>
-              {v === null ? null : `${v.toFixed(0)}%`}
-            </td>
-          ))}
+          {periods
+            .map((k) => average[k] ?? null)
+            .map((v, k) => (
+              <td key={k} className={v === null ? undefined : "n"}>
+                {v === null ? null : `${v.toFixed(0)}%`}
+              </td>
+            ))}
         </tr>
       </tbody>
     </table>

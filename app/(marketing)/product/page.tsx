@@ -14,12 +14,9 @@ import { SectionHead } from "@/components/marketing/SectionHead";
 import { SegmentBars } from "@/components/marketing/SegmentBars";
 import { ButtonLink } from "@/components/ui/ButtonLink";
 import { CheckList } from "@/components/ui/CheckList";
-import { COHORTS } from "@/lib/data/cohorts";
 import { CAPABILITY_CARDS, PLATFORM_CARDS, PROFILE_CHECKS, SEGMENT_CHECKS } from "@/lib/data/product";
-import { SCENARIOS, forecast, forecastEnd } from "@/lib/forecast";
+import { getDashboard, scenarioByKey } from "@/lib/api";
 import { money } from "@/lib/format";
-import { mrrLine, overviewKpis } from "@/lib/metrics";
-import { rangeStats } from "@/lib/revenue";
 
 export const metadata: Metadata = {
   title: "Revenue analytics: MRR, cohorts & forecasting",
@@ -29,10 +26,13 @@ export const metadata: Metadata = {
 
 const HERO_TITLE = { fontSize: "clamp(36px,4.6vw,58px)" };
 
-export default function ProductPage() {
-  const stats = rangeStats("12m");
-  const forecasts = SCENARIOS.map((s) => ({ ...s, forecast: forecast(s.key) }));
-  const base = forecasts.find((f) => f.key === "base")!.forecast;
+export const dynamic = "force-dynamic";
+
+export default async function ProductPage() {
+  const data = await getDashboard();
+  const overview = data.views["12m"];
+  const forecasts = data.forecast.scenarios;
+  const base = scenarioByKey(data, "base").forecast;
 
   return (
     <>
@@ -56,12 +56,12 @@ export default function ProductPage() {
           </div>
           <Panel variant="card" title="Overview · last 12 months" meta="Sample workspace">
             <KpiGrid
-              kpis={overviewKpis("12m").slice(0, 4)}
+              kpis={overview.kpis.slice(0, 4)}
               style={{ gridTemplateColumns: "repeat(2,minmax(0,1fr))" }}
             />
             <div className="cs-wide">
               <AreaChart
-                points={mrrLine(stats)}
+                points={overview.line}
                 width={560}
                 height={200}
                 labelEvery={1}
@@ -106,7 +106,7 @@ export default function ProductPage() {
             eyebrow="Customer profiles"
             title="Every account's revenue story on one page."
             lead="Open any customer to see their MRR over time, every plan change, failed payment and note from your team, next to health signals from your CRM."
-            visual={<CustomerProfile />}
+            visual={<CustomerProfile profile={data.profile} />}
           >
             <CheckList items={PROFILE_CHECKS} />
           </Feature>
@@ -126,7 +126,11 @@ export default function ProductPage() {
             meta="Oct 2025 – Sep 2026 cohorts · darker = higher retention"
           >
             <div className="scroll-x">
-              <CohortGrid cohorts={COHORTS} metric="net" />
+              <CohortGrid
+                cohorts={data.retention.cohorts}
+                average={data.retention.averages.net}
+                metric="net"
+              />
             </div>
           </Panel>
         </div>
@@ -151,11 +155,11 @@ export default function ProductPage() {
               {forecasts.map((f) => (
                 <div key={f.key}>
                   <small>{f.label}</small>
-                  <b>{money(forecastEnd(f.forecast))}</b>
+                  <b>{money(f.end)}</b>
                 </div>
               ))}
             </div>
-            <p className="note">Projected MRR in September 2027 for the sample workspace.</p>
+            <p className="note">Projected MRR in {data.forecast.horizonLabel} for the sample workspace.</p>
           </Feature>
         </div>
       </section>

@@ -1,16 +1,15 @@
-import { MAX_ATTEMPTS, OPEN_FAILED } from "@/lib/data/recovery";
-import type { OpenFailedPayment } from "@/lib/data/recovery";
 import { money } from "@/lib/format";
+import type { OpenFailedPayment } from "@/types/revenue";
 
 import { DataTable } from "./DataTable";
 import type { Column } from "./DataTable";
 import { StatusBadge } from "./StatusBadge";
 
-const COLUMNS: Column<OpenFailedPayment>[] = [
+const columns = (maxAttempts: number): Column<OpenFailedPayment>[] => [
   { key: "customer", header: "Customer", render: (p) => <b>{p.customer}</b> },
   { key: "amount", header: "Amount", numeric: true, render: (p) => money(p.amount) },
   { key: "reason", header: "Decline reason", render: (p) => p.reason },
-  { key: "attempts", header: "Attempts", numeric: true, render: (p) => `${p.attempts} of ${MAX_ATTEMPTS}` },
+  { key: "attempts", header: "Attempts", numeric: true, render: (p) => `${p.attempts} of ${maxAttempts}` },
   { key: "next", header: "Next retry", render: (p) => p.nextRetry },
   {
     key: "step",
@@ -19,6 +18,12 @@ const COLUMNS: Column<OpenFailedPayment>[] = [
   },
 ];
 
-export function OpenFailedTable() {
-  return <DataTable columns={COLUMNS} rows={OPEN_FAILED} rowKey={(p) => p.customer} />;
+export function OpenFailedTable({
+  payments,
+  maxAttempts,
+}: {
+  payments: OpenFailedPayment[];
+  maxAttempts: number;
+}) {
+  return <DataTable columns={columns(maxAttempts)} rows={payments} rowKey={(p) => p.customer} />;
 }

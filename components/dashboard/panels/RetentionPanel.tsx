@@ -1,15 +1,10 @@
 "use client";
 
-import { useMemo } from "react";
-
 import { AreaChart } from "@/components/charts/AreaChart";
 import { HBarList } from "@/components/charts/HBarList";
 import { Legend } from "@/components/charts/Legend";
-import { CANCELLATION_REASONS } from "@/lib/data/customers";
-import { COHORTS } from "@/lib/data/cohorts";
-import { retentionKpis, retentionSeries } from "@/lib/metrics";
 import { BLUE, RED } from "@/lib/palette";
-import type { CohortMetric } from "@/types/revenue";
+import type { CohortMetric, RetentionView } from "@/types/revenue";
 
 import { CohortGrid } from "../CohortGrid";
 import { KpiGrid } from "../KpiTile";
@@ -22,14 +17,14 @@ const METRIC_OPTIONS: Array<{ key: CohortMetric; label: string }> = [
 ];
 
 interface RetentionPanelProps {
+  retention: RetentionView;
   cohortMetric: CohortMetric;
   onCohortMetricChange: (metric: CohortMetric) => void;
 }
 
-export function RetentionPanel({ cohortMetric, onCohortMetricChange }: RetentionPanelProps) {
-  const series = useMemo(() => retentionSeries(), []);
-  const kpis = useMemo(() => retentionKpis(), []);
-  const [top1, , top3] = CANCELLATION_REASONS;
+export function RetentionPanel({ retention, cohortMetric, onCohortMetricChange }: RetentionPanelProps) {
+  const { series, kpis, cancellationReasons } = retention;
+  const [top1, , top3] = cancellationReasons;
 
   return (
     <>
@@ -49,7 +44,11 @@ export function RetentionPanel({ cohortMetric, onCohortMetricChange }: Retention
         }
       >
         <div className="scroll-x">
-          <CohortGrid cohorts={COHORTS} metric={cohortMetric} />
+          <CohortGrid
+            cohorts={retention.cohorts}
+            average={retention.averages[cohortMetric]}
+            metric={cohortMetric}
+          />
         </div>
       </Panel>
       <div className="dg dg-11">
@@ -76,7 +75,7 @@ export function RetentionPanel({ cohortMetric, onCohortMetricChange }: Retention
           />
         </Panel>
         <Panel title="Why customers cancel" meta="cancellation survey · 12 months">
-          <HBarList items={CANCELLATION_REASONS} color={RED} />
+          <HBarList items={cancellationReasons} color={RED} />
           <p className="note">
             {top1[0]} and {top3[0].toLowerCase()} together account for {top1[1] + top3[1]}% of cancellations,
             mostly on monthly Starter plans.

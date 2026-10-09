@@ -14,11 +14,11 @@ import { RetryTimeline } from "@/components/marketing/RetryTimeline";
 import { SectionHead } from "@/components/marketing/SectionHead";
 import { ButtonLink } from "@/components/ui/ButtonLink";
 import { CheckList } from "@/components/ui/CheckList";
-import { DECLINE_REASONS, RECOVERY_CHECKS, RECOVERY_FAQ } from "@/lib/data/recovery";
+import { getDashboard } from "@/lib/api";
+import { RECOVERY_CHECKS, RECOVERY_FAQ } from "@/lib/data/recovery";
 import { TRIAL_URL } from "@/lib/data/site";
 import { money } from "@/lib/format";
 import { BRAND, MINT } from "@/lib/palette";
-import { recoveryByMonth, recoveryFunnel } from "@/lib/recovery";
 
 export const metadata: Metadata = {
   title: "Failed payment recovery & dunning",
@@ -26,9 +26,11 @@ export const metadata: Metadata = {
     "Smart retries, branded reminder emails, in-app banners and a hosted card-update page that recover failed subscription payments, with reporting built in.",
 };
 
-export default function RecoveryPage() {
-  const funnel = recoveryFunnel();
-  const months = recoveryByMonth(12);
+export const dynamic = "force-dynamic";
+
+export default async function RecoveryPage() {
+  const { recovery } = await getDashboard();
+  const { funnel, months } = recovery;
 
   return (
     <>
@@ -109,7 +111,7 @@ export default function RecoveryPage() {
               </div>
             </Panel>
             <Panel variant="card" title="Why charges fail" meta="Share of declines">
-              <HBarList items={DECLINE_REASONS} color={BRAND} />
+              <HBarList items={recovery.declineReasons} color={BRAND} />
             </Panel>
           </div>
           <Panel
@@ -119,7 +121,7 @@ export default function RecoveryPage() {
             style={{ marginTop: 18 }}
           >
             <div className="scroll-x">
-              <OpenFailedTable />
+              <OpenFailedTable payments={recovery.openFailed} maxAttempts={recovery.maxAttempts} />
             </div>
           </Panel>
         </div>

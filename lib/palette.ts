@@ -1,4 +1,4 @@
-import type { Movement } from "@/types/revenue";
+import type { ActivityKind, Movement, Scenario, Tone } from "@/types/revenue";
 
 /** Movement palette, checked for colour-blind separation on a light surface. */
 export const MOVEMENT_COLORS: Record<Movement, string> = {
@@ -36,3 +36,29 @@ export const INK = "#0d1f1a";
 export const MUTED = "#5b6b66";
 
 export const { expansion: MINT, reactivation: BLUE, contraction: AMBER, churn: RED } = MOVEMENT_COLORS;
+
+/** Colours for the semantic tones the engine assigns to series, plans and funnel steps. */
+export const TONES: Record<Tone, string> = {
+  brand: BRAND,
+  brand_dark: BRAND_DARK,
+  ink: INK,
+  mint: MINT,
+  blue: BLUE,
+  amber: AMBER,
+  red: RED,
+  starter: "#9ad8bd",
+};
+
+export const toneColor = (tone: Tone | undefined, fallback = BRAND) => (tone ? TONES[tone] : fallback);
+
+export const SCENARIO_COLORS: Record<Scenario, string> = { conservative: AMBER, base: BRAND, stretch: BLUE };
+
+/** Glyph and colour for each kind of account activity. */
+export const ACTIVITY_STYLE: Record<ActivityKind, { glyph: string; color: string }> = {
+  upgrade: { glyph: "↗", color: BRAND },
+  recovered: { glyph: "↻", color: MINT },
+  cancellation: { glyph: "✕", color: RED },
+  seats: { glyph: "+", color: BRAND },
+  downgrade: { glyph: "↘", color: AMBER },
+  new: { glyph: "★", color: BLUE },
+};

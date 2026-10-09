@@ -2,6 +2,7 @@
 
 import { useTip } from "@/components/charts/TooltipProvider";
 import { money, num } from "@/lib/format";
+import { TONES } from "@/lib/palette";
 import type { PlanRow } from "@/types/revenue";
 
 /** MRR share by plan as a single stacked bar, with a legend and an optional plan table. */
@@ -13,7 +14,7 @@ export function PlanMix({ plans, table = true }: { plans: PlanRow[]; table?: boo
         {plans.map((p) => (
           <i
             key={p.name}
-            style={{ width: `${p.share.toFixed(2)}%`, background: p.color }}
+            style={{ width: `${p.share.toFixed(2)}%`, background: TONES[p.tone] }}
             {...tip(`${p.name}: ${money(p.mrr)} (${p.share.toFixed(1)}%)`)}
           />
         ))}
@@ -21,7 +22,7 @@ export function PlanMix({ plans, table = true }: { plans: PlanRow[]; table?: boo
       <div className="legend">
         {plans.map((p) => (
           <span key={p.name}>
-            <i style={{ background: p.color }} />
+            <i style={{ background: TONES[p.tone] }} />
             {p.name}
           </span>
         ))}
@@ -41,7 +42,7 @@ export function PlanMix({ plans, table = true }: { plans: PlanRow[]; table?: boo
               {plans.map((p) => (
                 <tr key={p.name}>
                   <td>
-                    <i className="dot" style={{ background: p.color }} />
+                    <i className="dot" style={{ background: TONES[p.tone] }} />
                     {p.name} <small>{p.price}</small>
                   </td>
                   <td className="n">{num(p.customers)}</td>

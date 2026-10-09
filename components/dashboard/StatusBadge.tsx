@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 
-import { STATUS_GLYPH } from "@/lib/data/customers";
-import type { StatusTone } from "@/lib/data/customers";
+import { STATUS_GLYPH } from "./status";
+import type { StatusTone } from "./status";
 
 export function StatusBadge({
   tone,
